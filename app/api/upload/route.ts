@@ -1,5 +1,13 @@
-import { writeFile } from "fs/promises";
+import { mkdir, writeFile } from "fs/promises";
 import path from "path";
+
+function uploadKlasoru() {
+  return process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+}
+
+function dosyaAdiniTemizle(dosyaAdi: string) {
+  return dosyaAdi.replace(/[^a-zA-Z0-9._-]/g, "-");
+}
 
 export async function POST(req: Request) {
   try {
@@ -13,15 +21,18 @@ export async function POST(req: Request) {
       );
     }
 
+    const klasor = uploadKlasoru();
+    await mkdir(klasor, { recursive: true });
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const fileName = Date.now() + "-" + file.name;
-    const filePath = path.join(process.cwd(), "public/uploads", fileName);
+    const fileName = Date.now() + "-" + dosyaAdiniTemizle(file.name);
+    const filePath = path.join(klasor, fileName);
 
     await writeFile(filePath, buffer);
 
     return Response.json({
-      path: "/uploads/" + fileName,
+      path: "/api/uploads/" + fileName,
     });
   } catch (error) {
     console.log(error);

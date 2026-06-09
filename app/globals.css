@@ -82,6 +82,22 @@ a {
   color: var(--brand);
 }
 
+.nav-logout {
+  background: var(--brand);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.nav-logout:hover {
+  background: var(--brand-dark);
+}
+
 .site-main {
   min-height: calc(100vh - 74px);
 }

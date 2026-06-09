@@ -1,6 +1,6 @@
 import "./globals.css";
-import Link from "next/link";
 import Script from "next/script";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata = {
   title: "YILMAZLAR GİYİM",
@@ -20,37 +20,7 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
 
-        <header className="site-header">
-          <h1 className="site-logo">
-            <Link href="/">YILMAZLAR GİYİM</Link>
-          </h1>
-
-          <nav className="site-nav">
-            <ul>
-              <li>
-                <Link href="/">Ana Sayfa</Link>
-              </li>
-              <li>
-                <Link href="/urunler">Ürünler</Link>
-              </li>
-              <li>
-                <Link href="/giris">Giriş</Link>
-              </li>
-              <li>
-                <Link href="/kayitol">Kayıt Ol</Link>
-              </li>
-              <li>
-                <Link href="/hakkimizda">Hakkımızda</Link>
-              </li>
-              <li>
-                <Link href="/iletisim">İletişim</Link>
-              </li>
-              <li>
-                <Link href="/sepet">Sepet</Link>
-              </li>
-            </ul>
-          </nav>
-        </header>
+        <SiteHeader />
 
         <main className="site-main">{children}</main>
       </body>

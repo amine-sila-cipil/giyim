@@ -50,6 +50,7 @@ export default function GirisPage() {
 
       if (data.user) {
         localStorage.setItem("user", JSON.stringify(data.user));
+        window.dispatchEvent(new Event("auth-changed"));
       }
 
       setDurum("basari");

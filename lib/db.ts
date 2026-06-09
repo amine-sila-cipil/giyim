@@ -1,6 +1,11 @@
+import { mkdirSync } from "fs";
+import path from "path";
 import sqlite3 from "sqlite3";
 
-const db = new sqlite3.Database("./veritabani.db");
+const dbPath = process.env.DB_PATH || path.join(process.cwd(), "veritabani.db");
+mkdirSync(path.dirname(dbPath), { recursive: true });
+
+const db = new sqlite3.Database(dbPath);
 
 db.serialize(() => {
   db.run(`
