@@ -19,9 +19,6 @@
     "start:public": "next start -H 0.0.0.0",
     "lint": "next lint"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
