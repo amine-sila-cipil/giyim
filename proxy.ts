@@ -7,6 +7,11 @@ function isAdminApiRequest(request: NextRequest): boolean {
 
   if (pathname === "/api/urun-sil") return true;
   if (pathname === "/api/upload") return true;
+  if (pathname.startsWith("/api/admin/") && pathname !== "/api/admin/login") return true;
+  if (pathname.startsWith("/api/stock")) return true;
+  if (pathname.startsWith("/api/users")) return true;
+  if (pathname.startsWith("/api/notifications")) return true;
+  if (pathname.startsWith("/api/orders") && request.method !== "POST") return true;
   if (pathname === "/api/urunler" && request.method !== "GET") return true;
 
   return false;
@@ -37,5 +42,15 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/urunler", "/api/urun-sil", "/api/upload"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/api/notifications/:path*",
+    "/api/orders/:path*",
+    "/api/stock/:path*",
+    "/api/upload",
+    "/api/urun-sil",
+    "/api/urunler",
+    "/api/users/:path*",
+  ],
 };

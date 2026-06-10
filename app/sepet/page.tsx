@@ -77,7 +77,34 @@ export default function SepetPage() {
       return;
     }
 
-    alert("Ödeme bilgileriniz alındı. Siparişiniz hazırlanıyor.");
+    const kayitliKullanici = localStorage.getItem("user");
+    const kullanici = kayitliKullanici ? JSON.parse(kayitliKullanici) : null;
+
+    if (!kullanici?.id) {
+      alert("Sipariş vermek için lütfen giriş yapın.");
+      return;
+    }
+
+    fetch("/api/orders", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: kullanici.id,
+        items: sepet.map((urun) => ({ productId: urun.id, adet: urun.adet || 1 })),
+        address: adres,
+        paymentMethod: odemeYontemi,
+      }),
+    })
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Sipariş oluşturulamadı");
+        localStorage.removeItem("sepet");
+        setSepet([]);
+        alert("Ödeme bilgileriniz alındı. Siparişiniz hazırlanıyor.");
+      })
+      .catch((error) => {
+        alert(error instanceof Error ? error.message : "Sipariş oluşturulamadı");
+      });
   };
 
   if (sepet.length === 0) {

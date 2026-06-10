@@ -1,22 +1,14 @@
-import db from "@/lib/db";
+import { Prisma } from "@prisma/client";
+import prisma from "@/lib/prisma";
 
 export async function GET(): Promise<Response> {
-  return new Promise<Response>((resolve) => {
-    db.all("SELECT * FROM kategoriler ORDER BY ad ASC", [], (err, rows) => {
-      if (err) {
-        console.log("CATEGORY DB ERROR:", err);
-        resolve(
-          Response.json(
-            { error: "Kategoriler alınamadı" },
-            { status: 500 }
-          )
-        );
-        return;
-      }
-
-      resolve(Response.json(rows));
-    });
-  });
+  try {
+    const rows = await prisma.category.findMany({ orderBy: { ad: "asc" } });
+    return Response.json(rows);
+  } catch (error) {
+    console.log("CATEGORY GET ERROR:", error);
+    return Response.json({ error: "Kategoriler alinamadi" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request): Promise<Response> {
@@ -25,39 +17,19 @@ export async function POST(req: Request): Promise<Response> {
     const kategoriAdi = String(ad ?? "").trim();
 
     if (!kategoriAdi) {
-      return Response.json(
-        { error: "Kategori adı gerekli" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Kategori adi gerekli" }, { status: 400 });
     }
 
-    await new Promise<void>((resolve, reject) => {
-      db.run(
-        "INSERT INTO kategoriler (ad) VALUES (?)",
-        [kategoriAdi],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
-
+    await prisma.category.create({ data: { ad: kategoriAdi } });
     return Response.json({ message: "Kategori eklendi" });
   } catch (error) {
     console.log("CATEGORY INSERT ERROR:", error);
-    const sqliteError = error as { code?: string };
 
-    if (sqliteError.code === "SQLITE_CONSTRAINT") {
-      return Response.json(
-        { error: "Bu kategori zaten var" },
-        { status: 409 }
-      );
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return Response.json({ error: "Bu kategori zaten var" }, { status: 409 });
     }
 
-    return Response.json(
-      { error: "Kategori eklenemedi" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Kategori eklenemedi" }, { status: 500 });
   }
 }
 
@@ -67,37 +39,20 @@ export async function DELETE(req: Request): Promise<Response> {
     const kategoriId = Number(id);
 
     if (!kategoriId) {
-      return Response.json(
-        { error: "Kategori seçilmedi" },
-        { status: 400 }
-      );
+      return Response.json({ error: "Kategori secilmedi" }, { status: 400 });
     }
 
-    await new Promise<void>((resolve, reject) => {
-      db.run(
-        "UPDATE urunler SET kategori_id = NULL WHERE kategori_id = ?",
-        [kategoriId],
-        (err) => {
-          if (err) reject(err);
-          else resolve();
-        }
-      );
-    });
-
-    await new Promise<void>((resolve, reject) => {
-      db.run("DELETE FROM kategoriler WHERE id = ?", [kategoriId], (err) => {
-        if (err) reject(err);
-        else resolve();
-      });
-    });
+    await prisma.$transaction([
+      prisma.product.updateMany({
+        where: { categoryId: kategoriId },
+        data: { categoryId: null },
+      }),
+      prisma.category.delete({ where: { id: kategoriId } }),
+    ]);
 
     return Response.json({ message: "Kategori silindi" });
   } catch (error) {
     console.log("CATEGORY DELETE ERROR:", error);
-
-    return Response.json(
-      { error: "Kategori silinemedi" },
-      { status: 500 }
-    );
+    return Response.json({ error: "Kategori silinemedi" }, { status: 500 });
   }
 }

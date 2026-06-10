@@ -1,20 +1,14 @@
-import db from "@/lib/db";
+import prisma from "@/lib/prisma";
+import { toLegacyProduct } from "@/lib/mappers";
 import SepeteEkle from "@/components/SepeteEkle";
 
 async function getUrun(id: string) {
-  return new Promise<any>((resolve, reject) => {
-    db.get(
-      `SELECT urunler.*, kategoriler.ad AS kategori_ad
-       FROM urunler
-       LEFT JOIN kategoriler ON kategoriler.id = urunler.kategori_id
-       WHERE urunler.id = ?`,
-      [id],
-      (err, row) => {
-        if (err) reject(err);
-        else resolve(row);
-      }
-    );
+  const product = await prisma.product.findUnique({
+    where: { id: Number(id) },
+    include: { category: true },
   });
+
+  return product ? toLegacyProduct(product) : null;
 }
 
 export default async function DetayPage({

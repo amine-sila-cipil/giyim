@@ -2,7 +2,11 @@ import { readFile } from "fs/promises";
 import path from "path";
 
 function uploadKlasoru() {
-  return process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+  return process.env.UPLOAD_DIR || "uploads";
+}
+
+function uploadDosyaYolu(dosyaAdi: string) {
+  return `${uploadKlasoru().replace(/[\\/]$/, "")}/${dosyaAdi}`;
 }
 
 function contentType(dosyaAdi: string) {
@@ -23,7 +27,7 @@ export async function GET(
   try {
     const { filename } = await params;
     const guvenliAd = path.basename(filename);
-    const filePath = path.join(uploadKlasoru(), guvenliAd);
+    const filePath = uploadDosyaYolu(guvenliAd);
     const dosya = await readFile(filePath);
 
     return new Response(dosya, {

@@ -1,4 +1,5 @@
-const ADMIN_COOKIE_NAME = "admin_auth";
+import { ADMIN_COOKIE_NAME } from "@/lib/auth";
+
 const ADMIN_DEFAULT_KEY = "yilmazlar-admin-2026";
 
 export async function POST(req: Request): Promise<Response> {
@@ -12,20 +13,22 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     if (key !== adminKey) {
-      return Response.json({ error: "Anahtar hatalı" }, { status: 401 });
+      return Response.json({ error: "Anahtar hatali" }, { status: 401 });
     }
 
-    const response = Response.json({ message: "Admin girişi başarılı" });
+    const response = Response.json({ message: "Admin girisi basarili" });
     const isProduction = process.env.NODE_ENV === "production";
 
     response.headers.append(
       "Set-Cookie",
-      `${ADMIN_COOKIE_NAME}=1; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400; ${isProduction ? "Secure;" : ""}`
+      `${ADMIN_COOKIE_NAME}=1; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400; ${
+        isProduction ? "Secure;" : ""
+      }`
     );
 
     return response;
   } catch (error) {
     console.log(error);
-    return Response.json({ error: "Giriş yapılamadı" }, { status: 500 });
+    return Response.json({ error: "Giris yapilamadi" }, { status: 500 });
   }
 }

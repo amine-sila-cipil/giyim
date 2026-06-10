@@ -1,29 +1,19 @@
-import db from "@/lib/db";
+import prisma from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
     const { id } = await req.json();
+    const productId = Number(id);
 
-    await new Promise((resolve, reject) => {
-      db.run(
-        "DELETE FROM urunler WHERE id = ?",
-        [id],
-        (err) => {
-          if (err) reject(err);
-          else resolve(true);
-        }
-      );
-    });
+    if (!productId) {
+      return Response.json({ error: "Urun secilmedi" }, { status: 400 });
+    }
 
-    return Response.json({
-      message: "Ürün silindi",
-    });
+    await prisma.product.delete({ where: { id: productId } });
+
+    return Response.json({ message: "Urun silindi" });
   } catch (error) {
-    console.log(error);
-
-    return Response.json(
-      { error: "Silinemedi" },
-      { status: 500 }
-    );
+    console.log("PRODUCT DELETE ERROR:", error);
+    return Response.json({ error: "Silinemedi" }, { status: 500 });
   }
 }

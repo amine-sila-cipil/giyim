@@ -6,29 +6,44 @@
     "node": "20.x"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0",
     "dev:public": "next dev -H 0.0.0.0",
     "build": "next build",
-    "start": "next start",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:dev": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate:sqlite": "tsx scripts/migrate-sqlite-to-postgres.ts",
+    "postinstall": "prisma generate",
+    "start": "next start -H 0.0.0.0",
     "start:public": "next start -H 0.0.0.0",
     "lint": "next lint"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "dotenv": "^17.3.1",
     "formidable": "^3.5.4",
+    "jsonwebtoken": "^9.0.3",
     "next": "^16.2.7",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "sqlite3": "^5.1.7"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
+    "prisma": "^6.19.3",
+    "sqlite3": "^5.1.7",
     "tailwindcss": "^4.1.11",
     "tsx": "^4.21.0",
     "typescript": "^5"

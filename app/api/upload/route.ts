@@ -1,8 +1,11 @@
 import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 
 function uploadKlasoru() {
-  return process.env.UPLOAD_DIR || path.join(process.cwd(), "uploads");
+  return process.env.UPLOAD_DIR || "uploads";
+}
+
+function uploadDosyaYolu(dosyaAdi: string) {
+  return `${uploadKlasoru().replace(/[\\/]$/, "")}/${dosyaAdi}`;
 }
 
 function dosyaAdiniTemizle(dosyaAdi: string) {
@@ -27,7 +30,7 @@ export async function POST(req: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const fileName = Date.now() + "-" + dosyaAdiniTemizle(file.name);
-    const filePath = path.join(klasor, fileName);
+    const filePath = uploadDosyaYolu(fileName);
 
     await writeFile(filePath, buffer);
 
