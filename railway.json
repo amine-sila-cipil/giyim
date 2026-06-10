@@ -5,7 +5,7 @@
     "buildCommand": "npm install --include=dev --no-audit --no-fund && npm run build && cp -r public .next/standalone/public && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/static"
   },
   "deploy": {
-    "preDeployCommand": "npm run db:migrate",
+    "preDeployCommand": "npx prisma migrate deploy",
     "startCommand": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
