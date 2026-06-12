@@ -3,18 +3,22 @@ services:
     name: giyim
     runtime: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install --include=dev --no-audit --no-fund && npm run db:generate && npm run build
+    startCommand: npm run db:migrate && npm run db:seed && npm run start
+    disks:
+      - name: uploads
+        mountPath: /var/data
+        sizeGB: 1
     envVars:
       - key: NODE_VERSION
-        value: 20
-      - key: DB_PATH
-        value: /var/data/veritabani.db
+        value: 20.20.2
+      - key: NODE_ENV
+        value: production
       - key: UPLOAD_DIR
         value: /var/data/uploads
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
       - key: ADMIN_PANEL_KEY
-        generateValue: true
-    disk:
-      name: giyim-data
-      mountPath: /var/data
-      sizeGB: 1
+        sync: false

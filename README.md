@@ -63,24 +63,23 @@ npm run build
 npm run start
 ```
 
-## Vercel Deploy
+## Render Deploy
 
-Proje Vercel için hazırlanmıştır. GitHub reposunu Vercel'e bağladıktan sonra aşağıdaki ortam değişkenlerini ekleyin:
+Proje Render için hazırlanmıştır. GitHub reposunu Render'a bağladıktan sonra aşağıdaki ortam değişkenlerini ekleyin:
 
 ```env
 DATABASE_URL="postgresql://..."
 JWT_SECRET="güçlü-bir-secret"
 ADMIN_PANEL_KEY="güçlü-bir-admin-anahtarı"
 NODE_ENV="production"
-BLOB_READ_WRITE_TOKEN="vercel-blob-token"
+UPLOAD_DIR="/var/data/uploads"
 ```
 
-Fotoğraf yükleme Vercel'de `BLOB_READ_WRITE_TOKEN` varsa Vercel Blob'a yapılır. Bu değer yoksa yükleme yerel `uploads` klasörüne yapılır; Vercel'de kalıcı fotoğraf için Blob token eklenmelidir.
-
-Vercel build komutu `vercel.json` içinde tanımlıdır:
+Render build ve start komutları `render.yaml` içinde tanımlıdır:
 
 ```bash
-npm run vercel-build
+npm install --include=dev --no-audit --no-fund && npm run db:generate && npm run build
+npm run db:migrate && npm run db:seed && npm run start
 ```
 
-Bu komut sırasıyla Prisma client üretir, migration dosyalarını PostgreSQL'e uygular ve Next.js build alır.
+Fotoğraf yüklemeleri `UPLOAD_DIR` değerine kaydedilir. Render'da fotoğrafların kalıcı olması için servis üzerinde persistent disk tanımlanmalı ve mount path `/var/data` olmalıdır.

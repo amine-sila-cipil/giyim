@@ -1,4 +1,0 @@
-{
-  "installCommand": "npm install --include=dev --no-audit --no-fund",
-  "buildCommand": "npm run vercel-build"
-}
