@@ -1,6 +1,6 @@
 # Inventtisi Giyim
 
-Next.js 16, TypeScript, PostgreSQL, Prisma ve Tailwind tabanlı stok/sipariş yönetimi projesi.
+Next.js 16, TypeScript, PostgreSQL, Prisma ve Tailwind tabanlı stok ve sipariş yönetimi projesi.
 
 ## Geliştirme
 
@@ -54,7 +54,7 @@ npm run db:migrate:sqlite
 ```
 
 Aktarım betiği tekrar çalıştırıldığında aynı e-posta, kategori ve ürün kayıtlarını çoğaltmaz.
-Uygulama runtime'ı artık SQLite kullanmaz; `sqlite3` yalnızca tek seferlik aktarım betiği için geliştirme bağımlılığıdır.
+Uygulama çalışma zamanında SQLite kullanmaz; `sqlite3` yalnızca tek seferlik aktarım betiği için geliştirme bağımlılığıdır.
 
 ## Üretim
 
@@ -63,12 +63,24 @@ npm run build
 npm run start
 ```
 
-## Railway Deploy
+## Vercel Deploy
 
-Railway için proje yapılandırması hazırdır:
+Proje Vercel için hazırlanmıştır. GitHub reposunu Vercel'e bağladıktan sonra aşağıdaki ortam değişkenlerini ekleyin:
 
-- `railway.json`
-- `next.config.ts` standalone output
-- PostgreSQL için Prisma migration
+```env
+DATABASE_URL="postgresql://..."
+JWT_SECRET="güçlü-bir-secret"
+ADMIN_PANEL_KEY="güçlü-bir-admin-anahtarı"
+NODE_ENV="production"
+BLOB_READ_WRITE_TOKEN="vercel-blob-token"
+```
 
-Detaylı adımlar için [RAILWAY_DEPLOYMENT.md](./RAILWAY_DEPLOYMENT.md) dosyasına bakın.
+Fotoğraf yükleme Vercel'de `BLOB_READ_WRITE_TOKEN` varsa Vercel Blob'a yapılır. Bu değer yoksa yükleme yerel `uploads` klasörüne yapılır; Vercel'de kalıcı fotoğraf için Blob token eklenmelidir.
+
+Vercel build komutu `vercel.json` içinde tanımlıdır:
+
+```bash
+npm run vercel-build
+```
+
+Bu komut sırasıyla Prisma client üretir, migration dosyalarını PostgreSQL'e uygular ve Next.js build alır.

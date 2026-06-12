@@ -23,11 +23,11 @@ type Tab = (typeof tabs)[number];
 
 const tabLabels: Record<Tab, string> = {
   dashboard: "Dashboard",
-  urunler: "ÃœrÃ¼nler",
+  urunler: "Ürünler",
   stok: "Stok",
-  siparisler: "SipariÅŸler",
-  musteriler: "MÃ¼ÅŸteriler",
-  kilavuz: "KÄ±lavuz",
+  siparisler: "Siparişler",
+  musteriler: "Müşteriler",
+  kilavuz: "Kılavuz",
 };
 
 const emptyForm = {
@@ -62,7 +62,7 @@ export default function AdminPage() {
   const fetchJson = async (url: string, options?: RequestInit) => {
     const res = await fetch(url, options);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Ä°ÅŸlem baÅŸarÄ±sÄ±z");
+    if (!res.ok) throw new Error(data.error || "İşlem başarısız");
     return data;
   };
 
@@ -85,7 +85,7 @@ export default function AdminPage() {
       setUsers(userData);
       setMovements(stockData);
     } catch (error) {
-      alert(error instanceof Error ? error.message : "Veriler alÄ±namadÄ±");
+      alert(error instanceof Error ? error.message : "Veriler alınamadı");
     }
   };
 
@@ -120,7 +120,7 @@ export default function AdminPage() {
       setEditingId(null);
       await loadAll();
     } catch (error) {
-      alert(error instanceof Error ? error.message : "ÃœrÃ¼n kaydedilemedi");
+      alert(error instanceof Error ? error.message : "Ürün kaydedilemedi");
     }
   };
 
@@ -140,7 +140,7 @@ export default function AdminPage() {
   };
 
   const deleteProduct = async (id: number) => {
-    if (!window.confirm("ÃœrÃ¼n silinsin mi?")) return;
+    if (!window.confirm("Ürün silinsin mi?")) return;
     await fetchJson("/api/urun-sil", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -189,12 +189,12 @@ export default function AdminPage() {
       <section className="admin-content">
         <div className="admin-topbar">
           <div>
-            <p>YÃ¶netim paneli</p>
+            <p>Yönetim paneli</p>
             <h2>{tabLabels[activeTab]}</h2>
           </div>
           <div className="admin-search">
             <input
-              placeholder="ÃœrÃ¼n ara"
+              placeholder="Ürün ara"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
             />
@@ -205,21 +205,21 @@ export default function AdminPage() {
         {activeTab === "dashboard" && (
           <>
             <div className="metric-grid">
-              <Metric title="Toplam Ã¼rÃ¼n" value={dashboard?.totalProducts || 0} />
-              <Metric title="Toplam sipariÅŸ" value={dashboard?.totalOrders || 0} />
-              <Metric title="GÃ¼nlÃ¼k satÄ±ÅŸ" value={`${dashboard?.dailySales || 0} TL`} />
-              <Metric title="AylÄ±k satÄ±ÅŸ" value={`${dashboard?.monthlySales || 0} TL`} />
-              <Metric title="OkunmamÄ±ÅŸ bildirim" value={dashboard?.unreadNotifications || 0} />
+              <Metric title="Toplam ürün" value={dashboard?.totalProducts || 0} />
+              <Metric title="Toplam sipariş" value={dashboard?.totalOrders || 0} />
+              <Metric title="Günlük satış" value={`${dashboard?.dailySales || 0} TL`} />
+              <Metric title="Aylık satış" value={`${dashboard?.monthlySales || 0} TL`} />
+              <Metric title="Okunmamış bildirim" value={dashboard?.unreadNotifications || 0} />
             </div>
-            <Panel title="Kritik stok uyarÄ±larÄ±">
+            <Panel title="Kritik stok uyarıları">
               <Table
-                headers={["ÃœrÃ¼n", "Stok", "Minimum"]}
+                headers={["Ürün", "Stok", "Minimum"]}
                 rows={kritikUrunler.map((urun) => [urun.ad, urun.stok, urun.minimumStok])}
               />
             </Panel>
-            <Panel title="Son sipariÅŸler">
+            <Panel title="Son Siparişler">
               <Table
-                headers={["No", "MÃ¼ÅŸteri", "Tutar", "Durum"]}
+                headers={["No", "Müşteri", "Tutar", "Durum"]}
                 rows={orders.slice(0, 8).map((order) => [
                   `#${order.id}`,
                   order.user?.email,
@@ -234,34 +234,34 @@ export default function AdminPage() {
         {activeTab === "urunler" && (
           <div className="admin-grid">
             <form className="admin-form" onSubmit={saveProduct}>
-              <h3>{editingId ? "ÃœrÃ¼n dÃ¼zenle" : "ÃœrÃ¼n ekle"}</h3>
-              <input name="ad" placeholder="ÃœrÃ¼n adÄ±" value={form.ad} onChange={handleChange} />
-              <textarea name="aciklama" placeholder="AÃ§Ä±klama" value={form.aciklama} onChange={handleChange} />
+              <h3>{editingId ? "Ürün Düzenle" : "Ürün ekle"}</h3>
+              <input name="ad" placeholder="Ürün adı" value={form.ad} onChange={handleChange} />
+              <textarea name="aciklama" placeholder="Açıklama" value={form.aciklama} onChange={handleChange} />
               <select name="kategoriId" value={form.kategoriId} onChange={handleChange}>
-                <option value="">Kategori seÃ§</option>
+                <option value="">Kategori seç</option>
                 {kategoriler.map((kategori) => (
                   <option key={kategori.id} value={kategori.id}>{kategori.ad}</option>
                 ))}
               </select>
               <div className="form-row">
-                <input name="alisFiyati" placeholder="AlÄ±ÅŸ fiyatÄ±" type="number" value={form.alisFiyati} onChange={handleChange} />
-                <input name="fiyat" placeholder="SatÄ±ÅŸ fiyatÄ±" type="number" value={form.fiyat} onChange={handleChange} />
+                <input name="alisFiyati" placeholder="Alış fiyatı" type="number" value={form.alisFiyati} onChange={handleChange} />
+                <input name="fiyat" placeholder="Satış fiyatı" type="number" value={form.fiyat} onChange={handleChange} />
               </div>
               <div className="form-row">
                 <input name="stok" placeholder="Stok" type="number" value={form.stok} onChange={handleChange} />
                 <input name="minimumStok" placeholder="Minimum stok" type="number" value={form.minimumStok} onChange={handleChange} />
               </div>
               <input type="file" onChange={handleImageUpload} />
-              {form.resim && <img className="admin-preview" src={form.resim} alt="ÃœrÃ¼n Ã¶n izlemesi" />}
-              <button type="submit">{editingId ? "GÃ¼ncelle" : "Ekle"}</button>
+              {form.resim && <img className="admin-preview" src={form.resim} alt="Ürün ön izlemesi" />}
+              <button type="submit">{editingId ? "Güncelle" : "Ekle"}</button>
             </form>
 
             <div>
               <form className="category-form" onSubmit={addCategory}>
-                <input placeholder="Kategori adÄ±" value={kategoriAdi} onChange={(event) => setKategoriAdi(event.target.value)} />
+                <input placeholder="Kategori adı" value={kategoriAdi} onChange={(event) => setKategoriAdi(event.target.value)} />
                 <button type="submit">Kategori ekle</button>
               </form>
-              <Panel title="ÃœrÃ¼n listesi">
+              <Panel title="Ürün listesi">
                 <div className="product-table">
                   {urunler.map((urun) => (
                     <article key={urun.id}>
@@ -271,7 +271,7 @@ export default function AdminPage() {
                         <span>{urun.kategori_ad || "Kategorisiz"}</span>
                         <small>{urun.fiyat} TL / Stok {urun.stok}</small>
                       </div>
-                      <button onClick={() => editProduct(urun)} type="button">DÃ¼zenle</button>
+                      <button onClick={() => editProduct(urun)} type="button">Düzenle</button>
                       <button onClick={() => deleteProduct(urun.id)} type="button">Sil</button>
                     </article>
                   ))}
@@ -283,17 +283,17 @@ export default function AdminPage() {
 
         {activeTab === "stok" && (
           <>
-            <Panel title="AnlÄ±k stok">
-              <Table headers={["ÃœrÃ¼n", "Stok", "Kritik"]} rows={urunler.map((urun) => [urun.ad, urun.stok, Number(urun.stok) <= Number(urun.minimumStok) ? "Evet" : "HayÄ±r"])} />
+            <Panel title="Anlık stok">
+              <Table headers={["Ürün", "Stok", "Kritik"]} rows={urunler.map((urun) => [urun.ad, urun.stok, Number(urun.stok) <= Number(urun.minimumStok) ? "Evet" : "Hayır"])} />
             </Panel>
-            <Panel title="Stok geÃ§miÅŸi">
-              <Table headers={["Tarih", "ÃœrÃ¼n", "Tip", "Miktar", "Not"]} rows={movements.map((m) => [new Date(m.createdAt).toLocaleDateString("tr-TR"), m.product?.ad, m.type, m.quantity, m.note])} />
+            <Panel title="Stok geçmişi">
+              <Table headers={["Tarih", "Ürün", "Tip", "Miktar", "Not"]} rows={movements.map((m) => [new Date(m.createdAt).toLocaleDateString("tr-TR"), m.product?.ad, m.type, m.quantity, m.note])} />
             </Panel>
           </>
         )}
 
         {activeTab === "siparisler" && (
-          <Panel title="SipariÅŸ yÃ¶netimi">
+          <Panel title="Sipariş yönetimi">
             <div className="order-list">
               {orders.map((order) => (
                 <article key={order.id}>
@@ -304,7 +304,7 @@ export default function AdminPage() {
                   <div>
                     <button onClick={() => updateOrder(order.id, "KARGODA")} type="button">Kargoda</button>
                     <button onClick={() => updateOrder(order.id, "TESLIM_EDILDI")} type="button">Teslim edildi</button>
-                    <button onClick={() => updateOrder(order.id, "IPTAL_EDILDI")} type="button">Ä°ptal</button>
+                    <button onClick={() => updateOrder(order.id, "IPTAL_EDILDI")} type="button">İptal</button>
                   </div>
                 </article>
               ))}
@@ -313,9 +313,9 @@ export default function AdminPage() {
         )}
 
         {activeTab === "musteriler" && (
-          <Panel title="MÃ¼ÅŸteri yÃ¶netimi">
+          <Panel title="Müşteri yönetimi">
             <Table
-              headers={["Ad soyad", "E-posta", "Rol", "Toplam harcama", "Son giriÅŸ"]}
+              headers={["Ad soyad", "E-posta", "Rol", "Toplam harcama", "Son giriş"]}
               rows={users.map((user) => [
                 `${user.ad} ${user.soyad}`.trim(),
                 user.email,
@@ -486,7 +486,7 @@ function Table({ headers, rows }: { headers: ReactNode[]; rows: ReactNode[][] })
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td colSpan={headers.length}>KayÄ±t yok</td></tr>
+            <tr><td colSpan={headers.length}>Kayıt yok</td></tr>
           ) : (
             rows.map((row, rowIndex) => (
               <tr key={rowIndex}>{row.map((cell, cellIndex) => <td key={cellIndex}>{cell}</td>)}</tr>
@@ -497,3 +497,4 @@ function Table({ headers, rows }: { headers: ReactNode[]; rows: ReactNode[][] })
     </div>
   );
 }
+

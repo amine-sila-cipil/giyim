@@ -1,4 +1,5 @@
 import { mkdir, writeFile } from "fs/promises";
+import { put } from "@vercel/blob";
 
 function uploadKlasoru() {
   return process.env.UPLOAD_DIR || "uploads";
@@ -15,23 +16,34 @@ function dosyaAdiniTemizle(dosyaAdi: string) {
 export async function POST(req: Request) {
   try {
     const data = await req.formData();
-    const file: any = data.get("file");
+    const file = data.get("file");
 
-    if (!file) {
+    if (!(file instanceof File)) {
       return Response.json(
         { error: "Dosya yok" },
         { status: 400 }
       );
     }
 
-    const klasor = uploadKlasoru();
-    await mkdir(klasor, { recursive: true });
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     const fileName = Date.now() + "-" + dosyaAdiniTemizle(file.name);
-    const filePath = uploadDosyaYolu(fileName);
 
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const blob = await put(`products/${fileName}`, buffer, {
+        access: "public",
+        contentType: file.type || "application/octet-stream",
+      });
+
+      return Response.json({
+        path: blob.url,
+      });
+    }
+
+    const klasor = uploadKlasoru();
+    await mkdir(klasor, { recursive: true });
+
+    const filePath = uploadDosyaYolu(fileName);
     await writeFile(filePath, buffer);
 
     return Response.json({
