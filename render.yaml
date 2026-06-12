@@ -3,8 +3,8 @@ services:
     name: giyim
     runtime: node
     plan: free
-    buildCommand: npm install --include=dev --no-audit --no-fund && npm run db:generate && npm run build
-    startCommand: npm run db:migrate && npm run db:seed && npm run start
+    buildCommand: npm install --include=dev --no-audit --no-fund && npm run render:build
+    startCommand: npm run render:start
     disks:
       - name: uploads
         mountPath: /var/data
