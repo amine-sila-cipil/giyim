@@ -57,6 +57,6 @@ export async function GET() {
     });
   } catch (error) {
     console.log("DASHBOARD ERROR:", error);
-    return Response.json({ error: "Dashboard verileri alinamadi" }, { status: 500 });
+    return Response.json({ error: "Dashboard verileri alınamadı" }, { status: 500 });
   }
 }

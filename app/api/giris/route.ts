@@ -13,14 +13,14 @@ export async function POST(req: Request): Promise<Response> {
     const sifre = String(body.sifre ?? "");
 
     if (!email || !sifre) {
-      return Response.json({ error: "Lutfen e-posta ve sifre girin" }, { status: 400 });
+      return Response.json({ error: "Lütfen e-posta ve şifre girin" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
     const isValid = user ? await verifyPassword(sifre, user.passwordHash) : false;
 
     if (!user || !isValid) {
-      return Response.json({ error: "E-posta veya sifre hatali" }, { status: 401 });
+      return Response.json({ error: "E-posta veya şifre hatalı" }, { status: 401 });
     }
 
     const upgradedHash = user.passwordHash.startsWith("$2") ? undefined : await hashPassword(sifre);
@@ -34,7 +34,7 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const response = Response.json({
-      message: "Giris basarili",
+      message: "Giriş başarılı",
       user: {
         email: updated.email,
         id: updated.id,
@@ -53,6 +53,6 @@ export async function POST(req: Request): Promise<Response> {
     return response;
   } catch (error) {
     console.log("LOGIN ERROR:", error);
-    return Response.json({ error: "Giris yapilamadi" }, { status: 500 });
+    return Response.json({ error: "Giriş yapılamadı" }, { status: 500 });
   }
 }

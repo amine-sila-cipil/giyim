@@ -756,6 +756,11 @@ a {
   grid-template-columns: minmax(280px, 390px) minmax(0, 1fr);
 }
 
+.stock-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 390px);
+}
+
 .admin-form {
   display: grid;
   gap: 12px;

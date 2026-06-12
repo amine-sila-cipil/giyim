@@ -9,7 +9,7 @@ export async function GET() {
     return Response.json(notifications);
   } catch (error) {
     console.log("NOTIFICATION GET ERROR:", error);
-    return Response.json({ error: "Bildirimler alinamadi" }, { status: 500 });
+    return Response.json({ error: "Bildirimler alınamadı" }, { status: 500 });
   }
 }
 
@@ -20,9 +20,9 @@ export async function PATCH(req: Request) {
       where: { id: Number(id) },
       data: { read: Boolean(read) },
     });
-    return Response.json({ message: "Bildirim guncellendi", notification });
+    return Response.json({ message: "Bildirim güncellendi", notification });
   } catch (error) {
     console.log("NOTIFICATION UPDATE ERROR:", error);
-    return Response.json({ error: "Bildirim guncellenemedi" }, { status: 500 });
+    return Response.json({ error: "Bildirim güncellenemedi" }, { status: 500 });
   }
 }

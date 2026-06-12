@@ -7,7 +7,7 @@ export async function GET(): Promise<Response> {
     return Response.json(rows);
   } catch (error) {
     console.log("CATEGORY GET ERROR:", error);
-    return Response.json({ error: "Kategoriler alinamadi" }, { status: 500 });
+    return Response.json({ error: "Kategoriler alınamadı" }, { status: 500 });
   }
 }
 
@@ -17,7 +17,7 @@ export async function POST(req: Request): Promise<Response> {
     const kategoriAdi = String(ad ?? "").trim();
 
     if (!kategoriAdi) {
-      return Response.json({ error: "Kategori adi gerekli" }, { status: 400 });
+      return Response.json({ error: "Kategori adı gerekli" }, { status: 400 });
     }
 
     await prisma.category.create({ data: { ad: kategoriAdi } });
@@ -39,7 +39,7 @@ export async function DELETE(req: Request): Promise<Response> {
     const kategoriId = Number(id);
 
     if (!kategoriId) {
-      return Response.json({ error: "Kategori secilmedi" }, { status: 400 });
+      return Response.json({ error: "Kategori seçilmedi" }, { status: 400 });
     }
 
     await prisma.$transaction([

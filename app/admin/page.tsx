@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import type { ChangeEvent, FormEvent, ReactNode } from "react";
+import type { ChangeEvent, FormEvent, KeyboardEvent, ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 type Category = { id: number; ad: string };
@@ -18,8 +18,44 @@ type Product = {
   stok?: number;
 };
 
+type StockMovementForm = {
+  note: string;
+  productId: string;
+  quantity: string;
+  type: "GIRIS" | "CIKIS" | "IADE" | "DUZELTME";
+};
+
 const tabs = ["dashboard", "urunler", "stok", "siparisler", "musteriler", "kilavuz"] as const;
 type Tab = (typeof tabs)[number];
+
+const numericFields = new Set(["alisFiyati", "fiyat", "stok", "minimumStok"]);
+
+function sadeceRakam(deger: string) {
+  return deger.replace(/\D/g, "");
+}
+
+function sayiTusunuKoru(event: KeyboardEvent<HTMLInputElement>) {
+  if (
+    event.ctrlKey ||
+    event.metaKey ||
+    ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Tab"].includes(event.key)
+  ) {
+    return;
+  }
+
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function sayisalGirisOzellikleri() {
+  return {
+    inputMode: "numeric" as const,
+    onKeyDown: sayiTusunuKoru,
+    pattern: "[0-9]*",
+    type: "text",
+  };
+}
 
 const tabLabels: Record<Tab, string> = {
   dashboard: "Dashboard",
@@ -53,6 +89,12 @@ export default function AdminPage() {
   const [kategoriAdi, setKategoriAdi] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [stockForm, setStockForm] = useState<StockMovementForm>({
+    note: "",
+    productId: "",
+    quantity: "",
+    type: "GIRIS",
+  });
 
   const kritikUrunler = useMemo(
     () => urunler.filter((urun) => Number(urun.stok) <= Number(urun.minimumStok ?? 5)),
@@ -94,7 +136,10 @@ export default function AdminPage() {
   }, []);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+    const value = numericFields.has(event.target.name)
+      ? sadeceRakam(event.target.value)
+      : event.target.value;
+    setForm((current) => ({ ...current, [event.target.name]: value }));
   };
 
   const handleImageUpload = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -167,6 +212,30 @@ export default function AdminPage() {
       body: JSON.stringify({ id, status }),
     });
     await loadAll();
+  };
+
+  const handleStockChange = (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setStockForm((current) => ({
+      ...current,
+      [name]: name === "quantity" ? sadeceRakam(value) : value,
+    }));
+  };
+
+  const saveStockMovement = async (event: FormEvent) => {
+    event.preventDefault();
+
+    try {
+      await fetchJson("/api/stock/movements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(stockForm),
+      });
+      setStockForm({ note: "", productId: "", quantity: "", type: "GIRIS" });
+      await loadAll();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : "Stok güncellenemedi");
+    }
   };
 
   return (
@@ -244,12 +313,12 @@ export default function AdminPage() {
                 ))}
               </select>
               <div className="form-row">
-                <input name="alisFiyati" placeholder="Alış fiyatı" type="number" value={form.alisFiyati} onChange={handleChange} />
-                <input name="fiyat" placeholder="Satış fiyatı" type="number" value={form.fiyat} onChange={handleChange} />
+                <input name="alisFiyati" placeholder="Alış fiyatı" value={form.alisFiyati} onChange={handleChange} {...sayisalGirisOzellikleri()} />
+                <input name="fiyat" placeholder="Satış fiyatı" value={form.fiyat} onChange={handleChange} {...sayisalGirisOzellikleri()} />
               </div>
               <div className="form-row">
-                <input name="stok" placeholder="Stok" type="number" value={form.stok} onChange={handleChange} />
-                <input name="minimumStok" placeholder="Minimum stok" type="number" value={form.minimumStok} onChange={handleChange} />
+                <input name="stok" placeholder="Stok" value={form.stok} onChange={handleChange} {...sayisalGirisOzellikleri()} />
+                <input name="minimumStok" placeholder="Minimum stok" value={form.minimumStok} onChange={handleChange} {...sayisalGirisOzellikleri()} />
               </div>
               <input type="file" onChange={handleImageUpload} />
               {form.resim && <img className="admin-preview" src={form.resim} alt="Ürün ön izlemesi" />}
@@ -283,6 +352,39 @@ export default function AdminPage() {
 
         {activeTab === "stok" && (
           <>
+            <div className="stock-grid">
+              <form className="admin-form" onSubmit={saveStockMovement}>
+                <h3>Stok ekle ve güncelle</h3>
+                <select name="productId" value={stockForm.productId} onChange={handleStockChange}>
+                  <option value="">Ürün seç</option>
+                  {urunler.map((urun) => (
+                    <option key={urun.id} value={urun.id}>
+                      {urun.ad} - Mevcut stok: {urun.stok ?? 0}
+                    </option>
+                  ))}
+                </select>
+                <select name="type" value={stockForm.type} onChange={handleStockChange}>
+                  <option value="GIRIS">Stok girişi</option>
+                  <option value="CIKIS">Stok çıkışı</option>
+                  <option value="IADE">İade</option>
+                  <option value="DUZELTME">Düzeltme</option>
+                </select>
+                <input
+                  name="quantity"
+                  placeholder="Miktar"
+                  value={stockForm.quantity}
+                  onChange={handleStockChange}
+                  {...sayisalGirisOzellikleri()}
+                />
+                <input
+                  name="note"
+                  placeholder="Not"
+                  value={stockForm.note}
+                  onChange={handleStockChange}
+                />
+                <button type="submit">Stoku güncelle</button>
+              </form>
+            </div>
             <Panel title="Anlık stok">
               <Table headers={["Ürün", "Stok", "Kritik"]} rows={urunler.map((urun) => [urun.ad, urun.stok, Number(urun.stok) <= Number(urun.minimumStok) ? "Evet" : "Hayır"])} />
             </Panel>

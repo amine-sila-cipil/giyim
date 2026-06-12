@@ -6,12 +6,12 @@ export async function POST(req: Request) {
     const productId = Number(id);
 
     if (!productId) {
-      return Response.json({ error: "Urun secilmedi" }, { status: 400 });
+      return Response.json({ error: "Ürün seçilmedi" }, { status: 400 });
     }
 
     await prisma.product.delete({ where: { id: productId } });
 
-    return Response.json({ message: "Urun silindi" });
+    return Response.json({ message: "Ürün silindi" });
   } catch (error) {
     console.log("PRODUCT DELETE ERROR:", error);
     return Response.json({ error: "Silinemedi" }, { status: 500 });

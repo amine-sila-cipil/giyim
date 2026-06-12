@@ -36,6 +36,6 @@ export async function GET(req: Request) {
     );
   } catch (error) {
     console.log("USER GET ERROR:", error);
-    return Response.json({ error: "Kullanicilar alinamadi" }, { status: 500 });
+    return Response.json({ error: "Kullanıcılar alınamadı" }, { status: 500 });
   }
 }

@@ -13,10 +13,10 @@ export async function POST(req: Request): Promise<Response> {
     }
 
     if (key !== adminKey) {
-      return Response.json({ error: "Anahtar hatali" }, { status: 401 });
+      return Response.json({ error: "Anahtar hatalı" }, { status: 401 });
     }
 
-    const response = Response.json({ message: "Admin girisi basarili" });
+    const response = Response.json({ message: "Admin girişi başarılı" });
     const isProduction = process.env.NODE_ENV === "production";
 
     response.headers.append(
@@ -29,6 +29,6 @@ export async function POST(req: Request): Promise<Response> {
     return response;
   } catch (error) {
     console.log(error);
-    return Response.json({ error: "Giris yapilamadi" }, { status: 500 });
+    return Response.json({ error: "Giriş yapılamadı" }, { status: 500 });
   }
 }

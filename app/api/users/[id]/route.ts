@@ -17,7 +17,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       },
     });
 
-    if (!user) return Response.json({ error: "Kullanici bulunamadi" }, { status: 404 });
+    if (!user) return Response.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
 
     return Response.json({
       ...user,
@@ -25,6 +25,6 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     });
   } catch (error) {
     console.log("USER DETAIL ERROR:", error);
-    return Response.json({ error: "Kullanici alinamadi" }, { status: 500 });
+    return Response.json({ error: "Kullanıcı alınamadı" }, { status: 500 });
   }
 }

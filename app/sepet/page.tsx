@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { KeyboardEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 
 type SepetUrunu = {
@@ -12,6 +13,33 @@ type SepetUrunu = {
   resim?: string;
   adet?: number;
 };
+
+function sadeceRakam(deger: string) {
+  return deger.replace(/\D/g, "");
+}
+
+function sayiTusunuKoru(event: KeyboardEvent<HTMLInputElement>) {
+  if (
+    event.ctrlKey ||
+    event.metaKey ||
+    ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "Tab"].includes(event.key)
+  ) {
+    return;
+  }
+
+  if (!/^\d$/.test(event.key)) {
+    event.preventDefault();
+  }
+}
+
+function sayisalGirisOzellikleri() {
+  return {
+    inputMode: "numeric" as const,
+    onKeyDown: sayiTusunuKoru,
+    pattern: "[0-9]*",
+    type: "text",
+  };
+}
 
 function sepeteOku(): SepetUrunu[] {
   try {
@@ -67,7 +95,7 @@ export default function SepetPage() {
   ) => {
     setAdres((mevcutAdres) => ({
       ...mevcutAdres,
-      [alan]: deger,
+      [alan]: alan === "telefon" ? sadeceRakam(deger) : deger,
     }));
   };
 
@@ -145,12 +173,11 @@ export default function SepetPage() {
                 <label>
                   Adet
                   <input
-                    min={1}
-                    type="number"
                     value={urun.adet || 1}
                     onChange={(event) =>
-                      adetDegistir(urun.id, Number(event.target.value))
+                      adetDegistir(urun.id, Number(sadeceRakam(event.target.value)) || 1)
                     }
+                    {...sayisalGirisOzellikleri()}
                   />
                 </label>
               </div>
@@ -178,10 +205,9 @@ export default function SepetPage() {
             />
             <input
               placeholder="Telefon"
-              inputMode="tel"
-              type="tel"
               value={adres.telefon}
               onChange={(event) => adresDegistir("telefon", event.target.value)}
+              {...sayisalGirisOzellikleri()}
             />
             <input
               placeholder="İl / İlçe"
@@ -229,10 +255,10 @@ export default function SepetPage() {
           {odemeYontemi === "kart" && (
             <div className="payment-form">
               <input placeholder="Kart üzerindeki isim" type="text" />
-              <input placeholder="Kart numarası" inputMode="numeric" type="text" />
+              <input placeholder="Kart numarası" {...sayisalGirisOzellikleri()} />
               <div>
-                <input placeholder="AA/YY" inputMode="numeric" type="text" />
-                <input placeholder="CVV" inputMode="numeric" type="password" />
+                <input placeholder="AA/YY" {...sayisalGirisOzellikleri()} />
+                <input placeholder="CVV" {...sayisalGirisOzellikleri()} />
               </div>
             </div>
           )}

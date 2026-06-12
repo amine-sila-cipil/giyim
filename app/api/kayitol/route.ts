@@ -26,11 +26,11 @@ export async function POST(req: Request): Promise<Response> {
     const soyadGirdisi = String(body.soyad ?? "").trim();
 
     if (!isim || !email || !sifre) {
-      return Response.json({ error: "Lutfen tum alanlari doldurun" }, { status: 400 });
+      return Response.json({ error: "Lütfen tüm alanları doldurun" }, { status: 400 });
     }
 
     if (sifre.length < 6) {
-      return Response.json({ error: "Sifre en az 6 karakter olmali" }, { status: 400 });
+      return Response.json({ error: "Şifre en az 6 karakter olmalı" }, { status: 400 });
     }
 
     const { ad, soyad } = splitName(isim, soyadGirdisi);
@@ -46,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
     });
 
     const response = Response.json({
-      message: "Kayit basarili",
+      message: "Kayıt başarılı",
       user: { email: user.email, id: user.id, isim: `${user.ad} ${user.soyad}`.trim(), rol: user.rol },
     });
 
@@ -62,9 +62,9 @@ export async function POST(req: Request): Promise<Response> {
     console.log("SIGNUP ERROR:", error);
 
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return Response.json({ error: "Bu e-posta ile zaten kayit var" }, { status: 409 });
+      return Response.json({ error: "Bu e-posta ile zaten kayıt var" }, { status: 409 });
     }
 
-    return Response.json({ error: "Kayit basarisiz" }, { status: 500 });
+    return Response.json({ error: "Kayıt başarısız" }, { status: 500 });
   }
 }

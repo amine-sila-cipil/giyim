@@ -41,7 +41,7 @@ export async function GET(req: Request) {
     return Response.json({ data: orders, meta: { limit, page, total } });
   } catch (error) {
     console.log("ORDER GET ERROR:", error);
-    return Response.json({ error: "Siparisler alinamadi" }, { status: 500 });
+    return Response.json({ error: "Siparişler alınamadı" }, { status: 500 });
   }
 }
 
@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     const items = Array.isArray(body.items) ? body.items : [];
 
     if (!userId || items.length === 0) {
-      return Response.json({ error: "Kullanici ve urunler gerekli" }, { status: 400 });
+      return Response.json({ error: "Kullanıcı ve ürünler gerekli" }, { status: 400 });
     }
 
     const order = await prisma.$transaction(async (tx) => {
@@ -67,9 +67,9 @@ export async function POST(req: Request) {
         const productId = item.productId;
         const product = productMap.get(productId);
         const adet = item.adet;
-        if (!product) throw new Error("Urun bulunamadi");
-        if (product.stok <= 0) throw new Error(`${product.ad} icin stok bitti`);
-        if (product.stok < adet) throw new Error(`${product.ad} icin stok yetersiz`);
+        if (!product) throw new Error("Ürün bulunamadı");
+        if (product.stok <= 0) throw new Error(`${product.ad} için stok bitti`);
+        if (product.stok < adet) throw new Error(`${product.ad} için stok yetersiz`);
         totalAmount += product.satisFiyati * adet;
         return { productId, adet, fiyat: product.satisFiyati };
       });
@@ -91,7 +91,7 @@ export async function POST(req: Request) {
 
         if (stockUpdate.count !== 1) {
           const product = productMap.get(item.productId);
-          throw new Error(`${product?.ad || "Urun"} icin stok yetersiz`);
+          throw new Error(`${product?.ad || "Ürün"} için stok yetersiz`);
         }
 
         const updated = await tx.product.findUniqueOrThrow({
@@ -103,15 +103,15 @@ export async function POST(req: Request) {
             productId: item.productId,
             quantity: -item.adet,
             type: "CIKIS",
-            note: `Siparis #${createdOrder.id}`,
+            note: `Sipariş #${createdOrder.id}`,
           },
         });
         if (updated.stok <= updated.minimumStok) {
           await tx.notification.create({
             data: {
               type: "KRITIK_STOK",
-              title: "Kritik stok uyarisi",
-              message: `${updated.ad} urunu kritik stok seviyesinde.`,
+              title: "Kritik stok uyarısı",
+              message: `${updated.ad} ürünü kritik stok seviyesinde.`,
             },
           });
         }
@@ -120,8 +120,8 @@ export async function POST(req: Request) {
       await tx.notification.create({
         data: {
           type: "YENI_SIPARIS",
-          title: "Yeni siparis",
-          message: `#${createdOrder.id} numarali yeni siparis olustu.`,
+          title: "Yeni sipariş",
+          message: `#${createdOrder.id} numaralı yeni sipariş oluştu.`,
         },
       });
 
@@ -146,30 +146,30 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const id = Number(body.id);
     const status = String(body.status || "");
-    if (!id || !status) return Response.json({ error: "Siparis ve durum gerekli" }, { status: 400 });
+    if (!id || !status) return Response.json({ error: "Sipariş ve durum gerekli" }, { status: 400 });
 
     const current = await prisma.order.findUnique({ where: { id } });
-    if (!current) return Response.json({ error: "Siparis bulunamadi" }, { status: 404 });
+    if (!current) return Response.json({ error: "Sipariş bulunamadı" }, { status: 404 });
 
     const currentIndex = statusFlow.indexOf(current.status);
     const nextIndex = statusFlow.indexOf(status);
     if (status !== "IPTAL_EDILDI" && nextIndex !== currentIndex + 1 && status !== current.status) {
-      return Response.json({ error: "Gecersiz siparis durumu akisi" }, { status: 400 });
+      return Response.json({ error: "Geçersiz sipariş durumu akışı" }, { status: 400 });
     }
 
     const order = await prisma.order.update({ where: { id }, data: { status: status as any } });
     await prisma.notification.create({
       data: {
         type: "SIPARIS_DURUM",
-        title: "Siparis durumu guncellendi",
-        message: `#${id} numarali siparis durumu ${status} oldu.`,
+        title: "Sipariş durumu güncellendi",
+        message: `#${id} numaralı sipariş durumu ${status} oldu.`,
         userId: order.userId,
       },
     });
 
-    return Response.json({ message: "Siparis durumu guncellendi", order });
+    return Response.json({ message: "Sipariş durumu güncellendi", order });
   } catch (error) {
     console.log("ORDER UPDATE ERROR:", error);
-    return Response.json({ error: "Siparis guncellenemedi" }, { status: 500 });
+    return Response.json({ error: "Sipariş güncellenemedi" }, { status: 500 });
   }
 }
