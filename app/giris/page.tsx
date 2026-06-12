@@ -68,7 +68,8 @@ export default function GirisPage() {
       setSifre("");
 
       setTimeout(() => {
-        router.push(data.user?.rol === "admin" ? nextPath || "/admin" : nextPath);
+        const hedef = data.user?.rol === "admin" ? "/admin" : nextPath;
+        router.push(hedef);
       }, 700);
     } catch (error) {
       console.log(error);
