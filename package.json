@@ -14,7 +14,7 @@
     "db:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate:sqlite": "tsx scripts/migrate-sqlite-to-postgres.ts",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && tsx prisma/seed.ts && next build",
     "postinstall": "prisma generate",
     "start": "next start -H 0.0.0.0",
     "start:public": "next start -H 0.0.0.0",

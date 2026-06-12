@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Durum = "basari" | "hata" | "";
 
@@ -13,6 +13,15 @@ export default function GirisPage() {
   const [durum, setDurum] = useState<Durum>("");
   const [mesaj, setMesaj] = useState("");
   const [loading, setLoading] = useState(false);
+  const [nextPath, setNextPath] = useState("/");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("next");
+    if (target?.startsWith("/")) {
+      setNextPath(target);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +48,7 @@ export default function GirisPage() {
       const data = (await res.json()) as {
         error?: string;
         message?: string;
-        user?: { email: string; id: number; isim: string };
+        user?: { email: string; id: number; isim: string; rol?: string };
       };
 
       if (!res.ok) {
@@ -59,7 +68,7 @@ export default function GirisPage() {
       setSifre("");
 
       setTimeout(() => {
-        router.push("/");
+        router.push(data.user?.rol === "admin" ? nextPath || "/admin" : nextPath);
       }, 700);
     } catch (error) {
       console.log(error);
