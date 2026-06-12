@@ -4,12 +4,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+type Kullanici = {
+  email?: string;
+  id?: number;
+  isim?: string;
+  rol?: string;
+};
+
+function kullaniciyiOku(): Kullanici | null {
+  try {
+    const kayitliKullanici = localStorage.getItem("user");
+    if (!kayitliKullanici) return null;
+
+    const kullanici = JSON.parse(kayitliKullanici);
+    return kullanici && typeof kullanici === "object" ? kullanici : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function SiteHeader() {
   const router = useRouter();
-  const [girisYapildi, setGirisYapildi] = useState(false);
+  const [kullanici, setKullanici] = useState<Kullanici | null>(null);
 
   const oturumKontrolEt = () => {
-    setGirisYapildi(Boolean(localStorage.getItem("user")));
+    setKullanici(kullaniciyiOku());
   };
 
   useEffect(() => {
@@ -30,6 +49,9 @@ export default function SiteHeader() {
     router.push("/");
   };
 
+  const girisYapildi = Boolean(kullanici);
+  const adminMi = kullanici?.rol === "admin";
+
   return (
     <header className="site-header">
       <h1 className="site-logo">
@@ -44,6 +66,11 @@ export default function SiteHeader() {
           <li>
             <Link href="/urunler">Ürünler</Link>
           </li>
+          {adminMi && (
+            <li>
+              <Link href="/admin">Admin</Link>
+            </li>
+          )}
           {!girisYapildi && (
             <>
               <li>
